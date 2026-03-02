@@ -49,7 +49,10 @@ const Dashboard = ({ setActiveTab }) => {
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">Welcome, User</h1>
               <div className="flex flex-wrap items-center gap-4">
                 <span className="flex items-center text-sm font-bold text-slate-500 bg-slate-100/50 px-4 py-1.5 rounded-full border border-slate-200/50"><Calendar size={14} className="mr-2" /> March 2, 2026</span>
-                <span className="flex items-center text-sm font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100"><ShieldCheck size={14} className="mr-2" /> GPU Sandbox: Secured</span>
+                <span className="flex items-center text-sm font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">
+                  <ShieldCheck size={14} className="mr-2" /> 
+                  {import.meta.env.PROD ? 'Cloud Sandbox: Groq Optimized' : 'GPU Sandbox: Secured'}
+                </span>
               </div>
             </div>
           </div>
@@ -212,7 +215,9 @@ const Dashboard = ({ setActiveTab }) => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight">AI Bio-Analysis Engine</h3>
-                  <p className="text-blue-200/60 text-sm font-medium">Real-time inference on AMD Radeon™</p>
+                  <p className="text-blue-200/60 text-sm font-medium">
+                    {import.meta.env.PROD ? 'Deep Clinical Inference on Groq Cloud' : 'Real-time inference on AMD Radeon™'}
+                  </p>
                 </div>
               </div>
               <span className="px-4 py-2 bg-green-500/20 text-green-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-500/30">Stable Sync</span>
@@ -268,8 +273,10 @@ const Dashboard = ({ setActiveTab }) => {
                   <BrainCircuit size={20} />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-slate-700 uppercase tracking-widest">Compute Node: Active</p>
-                  <p className="text-xs text-slate-500 leading-relaxed mt-1 font-medium">Verified local AMD Radeon hardware acceleration enabled via Foundry.</p>
+                  <p className="text-xs font-black text-slate-700 uppercase tracking-widest">{import.meta.env.PROD ? 'Compute: Cloud AI' : 'Compute Node: Active'}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed mt-1 font-medium">
+                    {import.meta.env.PROD ? 'Optimized cloud inference via Llama-3-70B on Groq infrastructure.' : 'Verified local AMD Radeon hardware acceleration enabled via Foundry.'}
+                  </p>
                 </div>
               </div>
             </div>

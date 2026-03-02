@@ -73,7 +73,9 @@ const Chat = () => {
             <div className="flex items-center space-x-2 mt-1">
               <span className={`w-2.5 h-2.5 rounded-full ${backendStatus.online ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}></span>
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                {backendStatus.online ? 'Radeon™ GPU Core Active' : 'Neural Node Offline'}
+                {backendStatus.online 
+                  ? (import.meta.env.PROD ? 'Groq™ Optimized' : 'Radeon™ GPU Core Active') 
+                  : 'Neural Node Offline'}
               </span>
             </div>
           </div>
@@ -165,7 +167,10 @@ const Chat = () => {
           </motion.button>
         </div>
         <div className="flex items-center justify-center mt-4 space-x-6 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-           <span className="flex items-center"><ShieldCheck size={12} className="mr-1 inline text-blue-400" /> Private Cloud-Free</span>
+           <span className="flex items-center">
+             <ShieldCheck size={12} className="mr-1 inline text-blue-400" /> 
+             {import.meta.env.PROD ? 'Secure Cloud Inference' : 'Private Cloud-Free'}
+           </span>
            <span className="flex items-center"><Activity size={12} className="mr-1 inline text-green-400" /> Context-Aware Active</span>
         </div>
       </div>

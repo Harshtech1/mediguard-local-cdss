@@ -8,7 +8,11 @@ const PrivacyBanner = () => {
         <ShieldCheck size={20} className="text-blue-600 animate-pulse" />
         <span className="font-semibold text-sm tracking-wide uppercase">Privacy First</span>
         <span className="h-4 w-px bg-blue-200 mx-2 hidden sm:block"></span>
-        <p className="text-sm font-medium hidden sm:block">All health data processed locally. Data stays 100% on your local AMD Radeon GPU.</p>
+        <p className="text-sm font-medium hidden sm:block">
+          {import.meta.env.PROD 
+            ? 'Encrypted clinical inference via Groq Secure Cloud.' 
+            : 'All health data processed locally. Data stays 100% on your local AMD Radeon GPU.'}
+        </p>
       </div>
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2 text-slate-500 hover:text-blue-600 cursor-help transition-colors">

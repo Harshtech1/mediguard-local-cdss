@@ -48,10 +48,12 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       
       <div className="mt-auto pt-6 border-t border-slate-100">
         <div className="bg-slate-50 rounded-2xl p-4 mb-4">
-          <p className="text-xs text-slate-400 mb-1">Local Node Status</p>
+          <p className="text-xs text-slate-400 mb-1">{import.meta.env.PROD ? 'Cloud AI Status' : 'Local Node Status'}</p>
           <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-sm font-semibold text-slate-700">AMD Radeon GPU Active</span>
+            <div className={`w-2.5 h-2.5 rounded-full ${import.meta.env.PROD ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'} animate-pulse`}></div>
+            <span className="text-sm font-semibold text-slate-700">
+              {import.meta.env.PROD ? 'Groq™ Optimized' : 'AMD Radeon™ Active'}
+            </span>
           </div>
         </div>
         <SidebarItem 
