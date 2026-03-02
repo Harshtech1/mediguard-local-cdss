@@ -2,16 +2,16 @@ import axios from 'axios';
 
 // --- CONFIGURATION ---
 const DEFAULT_PORT = 64281;
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://127.0.0.1:${DEFAULT_PORT}/v1`;
+const BASE_URL = import.meta.env.VITE_AI_API_URL || `http://127.0.0.1:${DEFAULT_PORT}/v1`;
 const MODEL_ID = import.meta.env.VITE_MODEL_ID || "qwen2.5-0.5b-instruct-generic-gpu:4";
 
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer not-needed'
+    'Authorization': `Bearer ${import.meta.env.VITE_API_KEY || 'not-needed'}`
   },
-  timeout: 30000, // 30s timeout for local GPU inference
+  timeout: 45000, // Increased timeout for potentially slower cloud/tunnel connections
 });
 
 // --- CORE LOGIC ---

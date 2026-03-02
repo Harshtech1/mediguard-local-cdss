@@ -25,6 +25,7 @@ dist-ssr
 
 # Privacy & Air-Gap Rules
 .env
+.env.local
 sample_report.txt
 *.pdf
 *.csv
