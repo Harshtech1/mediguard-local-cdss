@@ -36,10 +36,13 @@ const performAIRequest = async (payload) => {
     const response = await api.post('/chat/completions', payload);
     return { success: true, data: response.data.choices[0].message };
   } catch (error) {
-    let errorMessage = 'Connection Failed. Ensure Foundry is running.';
+    let errorMessage = isProd 
+      ? 'Cloud Connection Error. Verify Groq API Key in Vercel settings.' 
+      : 'Local Connection Failed. Ensure Foundry is running.';
     
-    if (error.code === 'ECONNABORTED') errorMessage = 'Inference Timed Out. GPU might be under heavy load.';
-    if (error.response?.status === 404) errorMessage = 'Model not found in current Foundry sandbox.';
+    if (error.code === 'ECONNABORTED') errorMessage = 'Inference Timed Out. AI might be under heavy load.';
+    if (error.response?.status === 401) errorMessage = 'Invalid API Key. Please update your AI credentials.';
+    if (error.response?.status === 404) errorMessage = isProd ? 'Cloud model not found.' : 'Model not found in local Foundry sandbox.';
     
     console.error('[AI SERVICE ERROR]:', error);
     return { success: false, error: errorMessage };
@@ -48,11 +51,18 @@ const performAIRequest = async (payload) => {
 
 export const checkBackendStatus = async () => {
   try {
-    // Standard OpenAI models list endpoint to verify node is ALIVE
-    await axios.get(`${BASE_URL}/models`, { timeout: 3000 });
-    return { online: true, message: 'GPU Node: Active' };
+    // Authenticated check using the primary API instance
+    await api.get('/models', { timeout: 5000 });
+    return { online: true, message: isProd ? 'Cloud AI: Active' : 'GPU Node: Active' };
   } catch (error) {
-    return { online: false, message: 'Backend Offline. Check port 64281.' };
+    // If it's a 401, the node IS online but the key is just bad
+    if (error.response?.status === 401) {
+      return { online: false, message: 'Invalid API Key' };
+    }
+    return { 
+      online: false, 
+      message: isProd ? 'Cloud API Unreachable' : `Local Node Offline (Port ${DEFAULT_PORT})` 
+    };
   }
 };
 
