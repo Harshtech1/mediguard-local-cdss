@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // --- CONFIGURATION ---
 const DEFAULT_PORT = 64281;
-const BASE_URL = `http://127.0.0.1:${DEFAULT_PORT}/v1`;
-const MODEL_ID = "qwen2.5-0.5b-instruct-generic-gpu:4";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://127.0.0.1:${DEFAULT_PORT}/v1`;
+const MODEL_ID = import.meta.env.VITE_MODEL_ID || "qwen2.5-0.5b-instruct-generic-gpu:4";
 
 const api = axios.create({
   baseURL: BASE_URL,
