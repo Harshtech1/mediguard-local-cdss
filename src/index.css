@@ -7,6 +7,12 @@
   --color-background: #f8fafc;
   --color-card: #ffffff;
   --color-text: #0f172a;
+
+  --color-deepak-red: #B22222;
+  --color-deepak-purple: #483D8B;
+  --color-deepak-yellow: #FFD700;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-sans: 'Inter', sans-serif;
 }
 
 @layer base {

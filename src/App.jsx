@@ -14,6 +14,7 @@ import DoctorDashboard from './components/DoctorDashboard';
 import SecureShare from './components/SecureShare';
 import ShareLanding from './screens/ShareLanding';
 import SettingsScreen from './screens/SettingsScreen';
+import DeepakClasses from './screens/DeepakClasses';
 import { useVitalsStore } from './services/vitalsStore';
 import { supabase } from './services/supabaseClient';
 import { useRole } from './hooks/useRole';
@@ -86,6 +87,9 @@ function AppInner() {
   if (path.startsWith('/share/')) {
     return <ShareLanding />;
   }
+  if (path.startsWith('/deepak-classes')) {
+    return <DeepakClasses />;
+  }
 
   return (
     <>
@@ -96,9 +100,9 @@ function AppInner() {
       <SignedIn>
         <div className="flex h-screen bg-[#f8fafc] overflow-hidden font-sans antialiased text-slate-800">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} role={role} />
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 ml-72">
             <PrivacyBanner />
-            <main className="flex-1 overflow-y-auto p-4 md:p-8">
+            <main className="flex-1 overflow-y-auto pt-24 pb-6 px-5">
               {renderContent()}
             </main>
           </div>

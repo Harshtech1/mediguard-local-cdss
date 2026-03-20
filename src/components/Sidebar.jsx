@@ -52,7 +52,7 @@ const Sidebar = ({ activeTab, setActiveTab, role = 'patient' }) => {
   const isDoctor = role === 'doctor';
 
   return (
-    <aside className="w-72 bg-white border-r border-slate-100 p-8 flex flex-col h-screen fixed left-0 top-0 overflow-hidden shadow-[10px_0_30px_rgba(0,0,0,0.01)]">
+    <aside className="w-72 bg-white border-r border-slate-100 p-8 flex flex-col h-screen fixed left-0 top-0 z-40 overflow-hidden shadow-[10px_0_30px_rgba(0,0,0,0.04)]">
       {/* Brand Header */}
       <div className="flex items-center mb-12 px-2">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg mr-4 ${isDoctor ? 'bg-gradient-to-tr from-violet-600 to-purple-700 shadow-violet-200' : 'bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-blue-200'}`}>

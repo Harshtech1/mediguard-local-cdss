@@ -3,7 +3,7 @@ import { ShieldCheck, Database, Info } from 'lucide-react';
 
 const PrivacyBanner = () => {
   return (
-    <div className="bg-blue-50 border-b border-blue-100 px-6 py-4 flex items-center justify-between sticky top-0 z-10 glass">
+    <div className="bg-white/90 backdrop-blur-sm border-b border-slate-100 px-6 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-sm">
       <div className="flex items-center space-x-3 text-blue-800">
         <ShieldCheck size={20} className="text-blue-600 animate-pulse" />
         <span className="font-semibold text-sm tracking-wide uppercase">Privacy First</span>

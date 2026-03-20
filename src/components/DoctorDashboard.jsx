@@ -14,9 +14,10 @@ const RISK_COLORS = {
 };
 
 function getRiskLevel(vitals) {
-  const glucose = parseFloat(vitals?.glucose);
-  const hr = parseFloat(vitals?.heart_rate);
-  const sys = parseInt(vitals?.blood_pressure?.split('/')[0]) || 120;
+  const glucose = parseFloat(vitals?.glucose || 0);
+  const hr = parseFloat(vitals?.heart_rate || 0);
+  const bp = vitals?.blood_pressure || '';
+  const sys = parseInt(bp.split('/')[0]) || 120;
 
   if (glucose > 180 || sys > 160 || hr > 120 || hr < 45) return 'critical';
   if (glucose > 126 || sys > 140 || hr > 100) return 'warning';

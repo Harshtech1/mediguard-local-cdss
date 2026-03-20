@@ -7,11 +7,12 @@ const ELEVEN_LABS_VOICE_ID =
   import.meta.env.VITE_ELEVENLABS_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL'; // "Sarah" – calm medical voice
 
 // ── TTS ──────────────────────────────────────────────────────────
-let currentAudioCtx = null;
-let currentSource   = null;
+let currentAudio = null;   // HTML Audio element for ElevenLabs playback
+let currentBlobUrl = null; // Blob URL to revoke on cleanup
 
 /**
- * Speak text via ElevenLabs streaming API.
+ * Speak text via ElevenLabs TTS API.
+ * Uses a Blob URL + Audio element for maximum browser compatibility.
  * Returns { success, stop }  – call stop() to interrupt playback.
  */
 export const speakText = async (text, onStart, onEnd) => {
@@ -24,45 +25,50 @@ export const speakText = async (text, onStart, onEnd) => {
   stopSpeaking();
 
   try {
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_LABS_VOICE_ID}/stream`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVEN_LABS_API_KEY,
+    // output_format must be a query parameter, not in the JSON body
+    const url = `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_LABS_VOICE_ID}?output_format=mp3_44100_128`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'xi-api-key': ELEVEN_LABS_API_KEY,
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.8,
         },
-        body: JSON.stringify({
-          text,
-          model_id: 'eleven_turbo_v2_5',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.8,
-            style: 0.0,
-            use_speaker_boost: true,
-          },
-          output_format: 'mp3_44100_128',
-        }),
-      }
-    );
+      }),
+    });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      console.error('[voiceService] ElevenLabs error:', err);
+      console.error('[voiceService] ElevenLabs error:', response.status, err);
       return browserSpeak(text, onStart, onEnd);
     }
 
+    // Create a Blob from the audio data and play via Audio element
+    // This is far more reliable than AudioContext.decodeAudioData with MP3
     const arrayBuffer = await response.arrayBuffer();
-    currentAudioCtx   = new (window.AudioContext || window.webkitAudioContext)();
-    const audioBuffer  = await currentAudioCtx.decodeAudioData(arrayBuffer);
+    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    currentBlobUrl = URL.createObjectURL(blob);
 
-    currentSource              = currentAudioCtx.createBufferSource();
-    currentSource.buffer       = audioBuffer;
-    currentSource.connect(currentAudioCtx.destination);
-    currentSource.onended = () => { onEnd?.(); };
+    currentAudio = new Audio(currentBlobUrl);
+    currentAudio.onplay = () => onStart?.();
+    currentAudio.onended = () => {
+      onEnd?.();
+      cleanupAudio();
+    };
+    currentAudio.onerror = (e) => {
+      console.error('[voiceService] Audio playback error:', e);
+      cleanupAudio();
+      onEnd?.();
+    };
 
-    onStart?.();
-    currentSource.start(0);
+    await currentAudio.play();
 
     return {
       success: true,
@@ -70,16 +76,32 @@ export const speakText = async (text, onStart, onEnd) => {
     };
   } catch (err) {
     console.error('[voiceService] TTS failed, fallback to browser:', err);
+    cleanupAudio();
     return browserSpeak(text, onStart, onEnd);
   }
 };
 
-export const stopSpeaking = () => {
+/** Clean up Blob URL and Audio element without cancelling browser TTS */
+const cleanupAudio = () => {
   try {
-    currentSource?.stop();
-    currentSource = null;
-    currentAudioCtx?.close();
-    currentAudioCtx = null;
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.removeAttribute('src');
+      currentAudio.load(); // release resources
+      currentAudio = null;
+    }
+    if (currentBlobUrl) {
+      URL.revokeObjectURL(currentBlobUrl);
+      currentBlobUrl = null;
+    }
+  } catch (_) {
+    // ignore
+  }
+};
+
+export const stopSpeaking = () => {
+  cleanupAudio();
+  try {
     window.speechSynthesis?.cancel();
   } catch (_) {
     // ignore

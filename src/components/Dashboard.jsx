@@ -98,47 +98,49 @@ const Dashboard = ({ setActiveTab }) => {
       variants={container}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-10 px-4 pb-20"
+      className="max-w-7xl mx-auto space-y-6 px-2 pb-10"
     >
       {/* Header */}
       <motion.div 
         variants={item}
-        className="bg-white p-10 rounded-[3rem] shadow-premium border border-slate-100 relative overflow-hidden group"
+        className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-20 -mt-20" />
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
-          <div className="flex items-center space-x-8">
-            <div className="w-24 h-24 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl">
-              <User size={48} />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
+          <div className="flex items-center space-x-5">
+            <div className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 shrink-0">
+              <User size={28} />
             </div>
             <div>
-              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Welcome, {user?.firstName || 'User'}</h1>
-              <div className="flex gap-4 mt-2">
-                <span className="text-sm font-bold text-slate-500 bg-slate-100 px-4 py-1.5 rounded-full">March 3, 2026</span>
-                <span className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">
+              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome, {user?.firstName || 'User'}</h1>
+              <div className="flex flex-wrap gap-2 mt-1.5">
+                <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                  {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
                   AI Forecasting Active
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex gap-4">
-             <button onClick={() => useVitalsStore.getState().seedData()} className="px-6 py-4 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition-all flex items-center">
-               <Database size={20} className="mr-3 text-slate-500" /> Seed Forecast Data
-             </button>
-             <button onClick={() => setActiveTab('vault')} className="px-8 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-100 flex items-center">
-               <Plus size={20} className="mr-3" /> Add Lab Report
-             </button>
+          <div className="flex gap-3">
+            <button onClick={() => useVitalsStore.getState().seedData()} className="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all flex items-center text-sm">
+              <Database size={16} className="mr-2 text-slate-500" /> Seed Data
+            </button>
+            <button onClick={() => setActiveTab('vault')} className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 flex items-center text-sm">
+              <Plus size={16} className="mr-2" /> Add Report
+            </button>
           </div>
         </div>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statItems.map((stat, idx) => (
           <motion.div 
             key={idx}
             variants={item}
-            className={`bg-white p-6 rounded-[2.5rem] shadow-premium border relative flex flex-col group ${
+            className={`bg-white p-5 rounded-3xl shadow-sm border relative flex flex-col z-10 ${
               stat.status === 'critical' ? 'border-red-200' : 
               stat.status === 'warning' ? 'border-amber-200' : 'border-slate-100'
             }`}
@@ -203,52 +205,61 @@ const Dashboard = ({ setActiveTab }) => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <motion.div variants={item} className="lg:col-span-2 bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* AI Forecast Card */}
+        <motion.div variants={item} className="lg:col-span-2 bg-slate-900 rounded-3xl p-7 text-white relative overflow-hidden z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-slate-900 pointer-events-none" />
           <div className="relative z-10">
-            <h3 className="text-2xl font-bold mb-4 flex items-center">
-              <BrainCircuit className="mr-3 text-blue-400" /> AI Forecast Insight
-            </h3>
-            <p className="text-blue-100 leading-relaxed italic text-lg opacity-80 mb-8">
-              "Based on your 30-day history, we predict your glucose will stabilize around 92 mg/dL. The current heart rate trend is perfectly linear with your activity levels."
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400">
+                <BrainCircuit size={18} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">AI Forecast Insight</h3>
+                <p className="text-[10px] text-blue-300 uppercase tracking-widest font-black">Clinical Prediction Engine</p>
+              </div>
+            </div>
+            <p className="text-blue-100/80 leading-relaxed text-sm mb-5 italic">
+              "Based on your 30-day history, glucose is trending toward stabilization around 92 mg/dL. Heart rate remains optimally linear with activity levels."
             </p>
-            <div className="flex gap-4">
-               <div className="flex-1 bg-white/10 p-4 rounded-2xl border border-white/10">
-                 <p className="text-[10px] font-black text-blue-300 uppercase mb-2">Glucose Forecast</p>
-                 <p className="text-sm font-bold">Stable (Next Reading: ~94)</p>
-               </div>
-               <div className="flex-1 bg-white/10 p-4 rounded-2xl border border-white/10">
-                 <p className="text-[10px] font-black text-indigo-300 uppercase mb-2">Warning Level</p>
-                 <p className="text-sm font-bold text-green-400">Green - Optimal</p>
-               </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white/10 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest mb-1">Glucose Forecast</p>
+                <p className="text-sm font-bold text-white">Stable · Next: ~94</p>
+              </div>
+              <div className="bg-white/10 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">Warning Level</p>
+                <p className="text-sm font-bold text-green-400">🟢 Optimal</p>
+              </div>
             </div>
           </div>
         </motion.div>
         
-        <motion.div variants={item} className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-premium">
-           <h3 className="text-xl font-bold mb-6 flex items-center">
-             <ShieldCheck className="mr-3 text-blue-600" /> Security
-           </h3>
-           <div className="space-y-4">
-             <div className="flex items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-               <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-4">
-                 <Activity size={18} />
-               </div>
-               <div>
-                  <p className="text-xs font-bold uppercase text-slate-800">Local OCR</p>
-                  <p className="text-[10px] text-slate-500">GPU Accelerated Extraction</p>
-               </div>
-             </div>
-             <div className="flex items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-               <div className="w-8 h-8 bg-slate-200 text-slate-600 rounded-lg flex items-center justify-center mr-4">
-                 <BrainCircuit size={18} />
-               </div>
-               <div>
-                  <p className="text-xs font-bold uppercase text-slate-800">Privacy Sync</p>
-                  <p className="text-[10px] text-slate-500">Clerk + Supabase Vault</p>
-               </div>
-             </div>
-           </div>
+        {/* Security Card */}
+        <motion.div variants={item} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm z-10">
+          <h3 className="text-base font-bold mb-5 flex items-center">
+            <ShieldCheck className="mr-2.5 text-blue-600" size={18} /> Security
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3 shrink-0">
+                <Activity size={16} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase text-slate-800">Local OCR</p>
+                <p className="text-[10px] text-slate-500">GPU Accelerated Extraction</p>
+              </div>
+            </div>
+            <div className="flex items-center p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="w-8 h-8 bg-slate-200 text-slate-600 rounded-lg flex items-center justify-center mr-3 shrink-0">
+                <BrainCircuit size={16} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase text-slate-800">Privacy Sync</p>
+                <p className="text-[10px] text-slate-500">Clerk + Supabase Vault</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </motion.div>

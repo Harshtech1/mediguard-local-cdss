@@ -1,9 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
-// https://vite.dev/config/
-// import { mcpMiddleware } from './src/mcpServer.js';
 export default defineConfig({
   plugins: [react()],
-// server block disabled while fixing MCP
+  resolve: {
+    alias: {
+      '@clerk/clerk-react': path.resolve(__dirname, './src/clerk-mock.jsx')
+    }
+  }
 });
