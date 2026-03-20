@@ -1,31 +1,120 @@
-import React, { useState } from 'react';
-import { FileText, Plus, Shield, Upload, Clock, Search, ExternalLink, Pin, Trash2, CheckCircle, Database } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { FileText, Plus, Shield, Upload, Clock, Search, ExternalLink, Pin, Trash2, CheckCircle, Database, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { extractVitals, formatMedicalSummary } from '../services/medicalParser';
+import { extractTextFromPDF } from '../services/pdfParser';
 import { useVitalsStore } from '../services/vitalsStore';
+import { supabase } from '../services/supabaseClient';
 
 const HealthVault = () => {
-  const [reports, setReports] = useState([
-    { id: 1, name: 'Blood Test - Annual Checkup', date: 'Jan 15, 2026', type: 'PDF', status: 'Analyzed', summary: 'High Sodium, Normal Glucose' },
-    { id: 2, name: 'Cardiology Report', date: 'Feb 10, 2026', type: 'PDF', status: 'In Review', summary: 'Waiting for AI analysis...' }
-  ]);
+  const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [pinContent, setPinContent] = useState('');
   const updateVitals = useVitalsStore(state => state.updateVitals);
+  const userId = useVitalsStore(state => state.userId);
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch from Supabase
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (!supabase || !userId) {
+        setLoading(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('health_documents')
+        .select('*')
+        .eq('user_id', userId)
+        .order('uploaded_at', { ascending: false });
+
+      if (!error && data) {
+        const mapped = data.map(d => ({
+          id: d.id,
+          name: d.filename,
+          date: new Date(d.uploaded_at).toLocaleDateString(),
+          type: 'PDF',
+          status: 'Analyzed',
+          summary: d.extracted_data?.summary || 'No summary available'
+        }));
+        setReports(mapped);
+      }
+      setLoading(false);
+    };
+    fetchReports();
+  }, [userId]);
+
+  const handlePDFUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !userId) return;
+    setUploading(true);
+    try {
+      const text = await extractTextFromPDF(file);
+      const vitals = extractVitals(text);
+      const cleanVitals = {};
+      Object.entries(vitals).forEach(([k, v]) => { if (v !== null) cleanVitals[k] = v; });
+      await updateVitals(cleanVitals);
+      
+      const summary = formatMedicalSummary(cleanVitals);
+      
+      // Save to Supabase
+      if (supabase) {
+        const { data, error } = await supabase.from('health_documents').insert([{
+          user_id: userId,
+          filename: file.name,
+          extracted_data: { summary, vitals: cleanVitals },
+        }]).select();
+
+        if (error) throw error;
+      }
+
+      setReports(prev => [{
+        id: Date.now(),
+        name: file.name.replace('.pdf', ''),
+        date: new Date().toLocaleDateString(),
+        type: 'PDF',
+        status: 'Analyzed',
+        summary: summary || 'Vitals extracted successfully',
+      }, ...prev]);
+    } catch (err) {
+      console.error('PDF upload error:', err);
+      alert('Failed to parse or save PDF. Check console for details.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!supabase) return;
+    const { error } = await supabase.from('health_documents').delete().eq('id', id);
+    if (!error) {
+      setReports(prev => prev.filter(r => r.id !== id));
+    }
+  };
 
   const handlePinContent = () => {
-    if (!pinContent.trim()) return;
+    if (!pinContent.trim() || !userId) return;
     
     const extracted = extractVitals(pinContent);
     const summary = formatMedicalSummary(pinContent);
     
-    // Update global store with non-null values
     const newVitals = {};
     Object.entries(extracted).forEach(([k, v]) => {
       if (v !== null) newVitals[k] = v;
     });
     updateVitals(newVitals);
+
+    // Also save pinned context to Supabase as a record
+    if (supabase) {
+      supabase.from('health_documents').insert([{
+        user_id: userId,
+        filename: 'Pinned Context',
+        extracted_data: { summary, isPinned: true },
+      }]);
+    }
 
     const newReport = {
       id: Date.now(),
@@ -68,12 +157,24 @@ const HealthVault = () => {
           </div>
         </div>
         <div className="flex gap-4 relative z-10">
+          {/* Hidden real file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={handlePDFUpload}
+          />
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center px-8 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 group"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center px-8 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 disabled:opacity-60 transition-all shadow-xl shadow-blue-100 group"
           >
-            <Upload size={20} className="mr-3 group-hover:-translate-y-1 transition-transform" /> Upload PDF
+            {uploading
+              ? <><Loader2 size={20} className="mr-3 animate-spin" /> Parsing…</>
+              : <><Upload size={20} className="mr-3 group-hover:-translate-y-1 transition-transform" /> Upload PDF</>}
           </motion.button>
           <motion.button 
             whileHover={{ scale: 1.05 }}
@@ -118,7 +219,7 @@ const HealthVault = () => {
                   </div>
                   <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button className="p-3 bg-white text-slate-400 hover:text-blue-600 rounded-xl border border-slate-100 shadow-sm transition-all hover:scale-110"><ExternalLink size={18} /></button>
-                    <button className="p-3 bg-white text-slate-400 hover:text-red-600 rounded-xl border border-slate-100 shadow-sm transition-all hover:scale-110"><Trash2 size={18} /></button>
+                    <button className="p-3 bg-white text-slate-400 hover:text-red-600 rounded-xl border border-slate-100 shadow-sm transition-all hover:scale-110" onClick={() => handleDelete(report.id)}><Trash2 size={18} /></button>
                   </div>
                 </div>
                 <h4 className="font-bold text-lg text-slate-900 mb-2 truncate group-hover:text-blue-600 transition-colors tracking-tight">{report.name}</h4>

@@ -1,47 +1,63 @@
+// src/services/medicalParser.js
 /**
- * Utility to parse unstructured medical text for key vitals.
+ * Very naive vitals extractor – scans text for common lab values.
+ * Returns an object with numeric values or null if not found.
  */
-export const extractVitals = (text) => {
+export function extractVitals(text) {
+  const lines = text.split('\n');
   const vitals = {
-    bloodPressure: null,
+    hemoglobin: null,
+    wbc: null,
+    platelets: null,
     glucose: null,
-    bmi: null,
-    heartRate: null,
-    sodium: null,
-    uricAcid: null
+    cholesterol: null,
+    triglycerides: null,
   };
 
-  // Regex patterns for common medical metrics (including multi-language aliases)
   const patterns = {
-    bloodPressure: /(\d{2,3}\/\d{2,3})\s*(mmHg|bp|tension|presion|PA)?/i,
-    glucose: /(\d{2,3})\s*(mg\/dL|glucose|sugar|glucosa|azucar)/i,
-    bmi: /(bmi|imc)\s*[:=]?\s*(\d{1,2}\.?\d?)/i,
-    heartRate: /(\d{2,3})\s*(bpm|pulse|heart rate|ritmo cardiaco|pulso)/i,
-    sodium: /(high|low|normal|high|bajo|normal)\s*(sodium|salt|sodio|sal)/i,
-    uricAcid: /(uric acid|ácido úrico)\s*[:=]?\s*(\d{1,2}\.?\d?)/i
+    hemoglobin: /hemoglobin[:\s]*([\d.]+)\s*g\/dL/i,
+    wbc: /wbc[:\s]*([\d.]+)\s*\*?10\^9\/L/i,
+    platelets: /platelets[:\s]*([\d.]+)\s*10\^9\/L/i,
+    glucose: /glucose[:\s]*([\d.]+)\s*mg\/dL/i,
+    cholesterol: /cholesterol[:\s]*([\d.]+)\s*mg\/dL/i,
+    triglycerides: /triglycerides[:\s]*([\d.]+)\s*mg\/dL/i,
   };
 
-  Object.keys(patterns).forEach(key => {
-    const match = text.match(patterns[key]);
-    if (match) {
-      // For bloodPressure, capture groups already work well. For others, ensure we grab the right group.
-      vitals[key] = match[1] || match[2];
-      
-      // Specifically for sodium, if it's descriptive (high/low/normal)
-      if (key === 'sodium') {
-        vitals[key] = match[1].toLowerCase();
+  for (const [key, regex] of Object.entries(patterns)) {
+    for (const line of lines) {
+      const match = line.match(regex);
+      if (match) {
+        vitals[key] = parseFloat(match[1]);
+        break;
       }
     }
-  });
-
+  }
   return vitals;
-};
+}
 
-export const formatMedicalSummary = (text) => {
-  const vitals = extractVitals(text);
-  const found = Object.entries(vitals).filter(([_, v]) => v !== null);
-  
-  if (found.length === 0) return "No specific vitals extracted. General context applied.";
-  
-  return `Extracted Vitals: ${found.map(([k, v]) => `${k.toUpperCase()}: ${v}`).join(', ')}`;
-};
+/**
+ * Formats a vitals object (or raw text) into a clean, human-readable summary string.
+ * Used by HealthVault to display a brief AI-context summary of pinned content.
+ * @param {Object|string} input - A vitals object OR raw text string.
+ * @returns {string}
+ */
+export function formatMedicalSummary(input) {
+  if (!input) return 'No data available';
+
+  // If a plain string was passed, return a trimmed excerpt
+  if (typeof input === 'string') {
+    const preview = input.replace(/\s+/g, ' ').trim().slice(0, 200);
+    return preview.length < input.trim().length ? `${preview}…` : preview;
+  }
+
+  // If a vitals object was passed, format it into a sentence
+  const parts = [];
+  if (input.glucose)       parts.push(`Glucose: ${input.glucose} mg/dL`);
+  if (input.hemoglobin)    parts.push(`Hemoglobin: ${input.hemoglobin} g/dL`);
+  if (input.wbc)           parts.push(`WBC: ${input.wbc}×10⁹/L`);
+  if (input.platelets)     parts.push(`Platelets: ${input.platelets}×10⁹/L`);
+  if (input.cholesterol)   parts.push(`Cholesterol: ${input.cholesterol} mg/dL`);
+  if (input.triglycerides) parts.push(`Triglycerides: ${input.triglycerides} mg/dL`);
+
+  return parts.length > 0 ? parts.join(' · ') : 'No recognisable vitals found';
+}
