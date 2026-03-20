@@ -10,12 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.3",
+    "@clerk/clerk-sdk-node": "^5.1.6",
+    "@stripe/stripe-js": "^8.9.0",
+    "@supabase/supabase-js": "^2.98.0",
     "axios": "^1.13.6",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.34.3",
+    "drizzle-orm": "^0.45.1",
+    "framer-motion": "^12.34.5",
     "lucide-react": "^0.575.0",
+    "pdfjs-dist": "^5.5.207",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-dropzone": "^15.0.0",
+    "react-hot-toast": "^2.6.0",
+    "react-markdown": "^10.1.0",
+    "recharts": "^3.7.0",
     "tailwind-merge": "^3.5.0",
     "zustand": "^5.0.11"
   },
