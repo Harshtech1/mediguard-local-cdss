@@ -1,6 +1,6 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "cd mediguard && npm install && npm run build",
+  "outputDirectory": "mediguard/dist",
   "framework": "vite"
 }

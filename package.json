@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "postinstall": "cd mediguard && npm install",
+    "build": "cd mediguard && npm run build",
+    "dev": "cd mediguard && npm run dev"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
     "pdfjs-dist": "^5.5.207",
